@@ -10,7 +10,7 @@
 namespace Bookworm;
 
 /**
- * Bookworm
+ * Bookworm.
  *
  * Bookworm is a library that estimates reading time.
  *
@@ -19,27 +19,10 @@ namespace Bookworm;
 class Bookworm
 {
     /**
-     * Types that Bookworm can return the duration.
-     */
-    const TYPE_SHORT = 1;
-    const TYPE_LONG = 2;
-    const TYPE_NONE = 3;
-
-    /**
-     * Translations used in the estimate function
-     *
-     * @var array
-     * @see Bookworm::configure()
-     */
-    private static $translations = array(
-        'minute' => 'minute',
-        'min'    => 'min'
-    );
-
-    /**
      * The avarage number of words a person can read in one minute.
      *
      * @link http://ezinearticles.com/?What-is-the-Average-Reading-Speed-and-the-Best-Rate-of-Reading?&id=2298503
+     *
      * @var int
      */
     private static $wordsPerMinute = 200;
@@ -54,12 +37,12 @@ class Bookworm
     /**
      * Estimates the time needed to read a given string.
      *
-     * @param string $text The text to estimate
-     * @param int    $type The type of the returned estimate
+     * @param string       $text  The text to estimate
+     * @param string|array $units singular | singular & plural
      *
      * @return string
      */
-    public static function estimate($text, $type = self::TYPE_SHORT)
+    public static function estimate($text, $units = array(' minute', ' minutes'))
     {
         // Count how many words are in the given text
         $wordCount = self::countWords($text);
@@ -72,12 +55,19 @@ class Bookworm
         // If it's smaller than one or one, we default it to one
         $minutes = $minutes > 1 ? $minutes : 1;
 
-        // Get the proper textual representation
-        if ($type !== self::TYPE_NONE) {
-            $textual = ' ' . self::$translations[$type == self::TYPE_SHORT ? 'min' : 'minute'];
+        // return only int, if $units set to false
+
+        if (is_string($units) === true) {
+            return $minutes.$units;
         }
 
-        return $minutes . (isset($textual) ? $textual : '');
+        if (is_array($units) === true && count($units) === 2) {
+            $units = array_values($units);
+
+            return $minutes.($minutes === 1 ? $units[0] : $units[1]);
+        }
+
+        return $minutes;
     }
 
     /**
@@ -123,17 +113,20 @@ class Bookworm
     /**
      * Alters the configuration.
      *
-     * @param int   $wordsPerMinute The amount of words an average person reads per minute
-     * @param array $translations   The translations that have to be used
+     * @param array $config $wordsPerMinute
      */
-    public static function configure($wordsPerMinute, array $translations = null)
+    public static function configure(array $config = array())
     {
-        if ($translations) {
-            self::$translations = $translations;
-        }
+        $config = array_merge(
+            array(
+                'wordsPerMinute' => 200,
+                'secondsPerImage' => 12,
+            ),
+            $config
+        );
 
-        if ($wordsPerMinute) {
-            self::$wordsPerMinute = $wordsPerMinute;
-        }
+        self::$wordsPerMinute = $config['wordsPerMinute'];
+
+        self::$secondsPerImage = $config['secondsPerImage'];
     }
 }
