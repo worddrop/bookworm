@@ -23,6 +23,7 @@ class Bookworm
      */
     const TYPE_SHORT = 1;
     const TYPE_LONG = 2;
+    const TYPE_NONE = 3;
 
     /**
      * Translations used in the estimate function
@@ -72,9 +73,11 @@ class Bookworm
         $minutes = $minutes > 1 ? $minutes : 1;
 
         // Get the proper textual representation
-        $textual = self::$translations[$type == self::TYPE_SHORT ? 'min' : 'minute'];
+        if ($type !== self::TYPE_NONE) {
+            $textual = ' ' . self::$translations[$type == self::TYPE_SHORT ? 'min' : 'minute'];
+        }
 
-        return $minutes . ' ' . $textual;
+        return $minutes . (isset($textual) ? $textual : '');
     }
 
     /**

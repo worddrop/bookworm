@@ -77,4 +77,17 @@ class BookwormTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('2 min', $readingTime, 'Markdown does not return correct timing.');
     }
+    
+    /**
+     * Tests if the reading time type is set to none.
+     */
+    public function testTypeNone()
+    {
+        // 116 words
+        $story = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus auctor leo mauris, quis rutrum mi vulputate vitae. Aliquam nec lacus augue. Ut diam nisl, porttitor sit amet mattis eget, vulputate nec mi. Curabitur mi augue, aliquam a fringilla in, sollicitudin vitae sem. Fusce at convallis orci. Curabitur commodo blandit nulla in dignissim. Sed tempus sagittis imperdiet. Nullam in purus nec nibh varius molestie. Pellentesque vel consequat urna. Sed tristique quam justo, vel vestibulum lorem porttitor et. Fusce laoreet, lorem et elementum aliquet, neque nulla imperdiet arcu, a ullamcorper libero leo quis turpis. Fusce feugiat, tellus sit amet varius vehicula, massa magna consectetur nulla, non ornare justo urna non velit. Praesent rutrum nisi dignissim enim eleifend egestas.';
+
+        $readingTime = Bookworm::estimate($story, Bookworm::TYPE_NONE);
+
+        $this->assertEquals('1', $readingTime, 'Text with less than a minute & type NONE does not return 1.');
+    }
 }
