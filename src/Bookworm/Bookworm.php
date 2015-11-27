@@ -91,6 +91,10 @@ class Bookworm
     {
         // Remove markdown images from text
         $words = trim(preg_replace('/!\[([^\[]+)\]\(([^\)]+)\)/i', ' ', $text));
+        // Remove image tags from text
+        $words = trim(preg_replace('/<img[^>]*>/i', ' ', $words));
+        // Remove picture tags from text (counted already due to mandatory img tag)
+        $words = trim(preg_replace('/<picture[^>]*>([\s\S]*?)<\/picture>/i', ' ', $words));
         // Replace any non-word character group with a space
         $words = trim(preg_replace('/[^\w0-9]+/i', ' ', $words));
         // Explode on spaces to separate words
@@ -109,9 +113,11 @@ class Bookworm
     private static function countImages($text)
     {
         // Count markdown images from text
-        $images = preg_match_all('/!\[([^\[]+)\]\(([^\)]+)\)/i', $text, $matches);
+        $markdownImages = preg_match_all('/!\[([^\[]+)\]\(([^\)]+)\)/i', $text, $matches);
+        // Count image tags from text
+        $imgTags = preg_match_all('/<img[^>]*>/i', $text, $matches);
 
-        return $images;
+        return $markdownImages + $imgTags;
     }
 
     /**
