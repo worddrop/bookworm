@@ -45,6 +45,13 @@ class Bookworm
     private static $wordsPerMinute = 200;
 
     /**
+     * The avarage number of seconds a person looks at an image.
+     *
+     * @var int
+     */
+    private static $secondsPerImage = 12;
+
+    /**
      * Estimates the time needed to read a given string.
      *
      * @param string $text The text to estimate
@@ -56,10 +63,12 @@ class Bookworm
     {
         // Count how many words are in the given text
         $wordCount = self::countWords($text);
-
+        $wordSeconds = ($wordCount / self::$wordsPerMinute) * 60;
+        // Count how many images are in the given text
+        $imageCount = self::countImages($text);
+        $imageSeconds = $imageCount * self::$secondsPerImage;
         // Calculate the amount of minutes required to read the text
-        $minutes = round($wordCount / self::$wordsPerMinute);
-
+        $minutes = round(($wordSeconds + $imageSeconds) / 60);
         // If it's smaller than one or one, we default it to one
         $minutes = $minutes > 1 ? $minutes : 1;
 
@@ -72,7 +81,7 @@ class Bookworm
     }
 
     /**
-     * Counts how many words are in a specific test.
+     * Counts how many words are in a specific text.
      *
      * @param string $text The text from which the words should be counted
      *
@@ -80,13 +89,35 @@ class Bookworm
      */
     private static function countWords($text)
     {
+        // Remove markdown images from text
+        $words = trim(preg_replace('/!\[([^\[]+)\]\(([^\)]+)\)/i', ' ', $text));
+        // Remove image tags from text
+        $words = trim(preg_replace('/<img[^>]*>/i', ' ', $words));
+        // Remove picture tags from text (counted already due to mandatory img tag)
+        $words = trim(preg_replace('/<picture[^>]*>([\s\S]*?)<\/picture>/i', ' ', $words));
         // Replace any non-word character group with a space
-        $words = trim(preg_replace('/[^\w0-9]+/i', ' ', $text));
-
+        $words = trim(preg_replace('/[^\w0-9]+/i', ' ', $words));
         // Explode on spaces to separate words
         $words = explode(' ', $words);
 
         return count($words);
+    }
+
+    /**
+     * Counts how many images are in a specific text.
+     *
+     * @param string $text The text from which the words should be counted
+     *
+     * @return int
+     */
+    private static function countImages($text)
+    {
+        // Count markdown images from text
+        $markdownImages = preg_match_all('/!\[([^\[]+)\]\(([^\)]+)\)/i', $text, $matches);
+        // Count image tags from text
+        $imgTags = preg_match_all('/<img[^>]*>/i', $text, $matches);
+
+        return $markdownImages + $imgTags;
     }
 
     /**
