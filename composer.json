@@ -14,10 +14,11 @@
     },
     "require-dev": {
         "phpunit/phpunit": ">=4.1.0",
-        "squizlabs/php_codesniffer": "*"
+        "squizlabs/php_codesniffer": "*",
+        "fabpot/php-cs-fixer": "^1.11"
     },
     "scripts": {
-        "test": "vendor/bin/phpcs --standard=PSR2 src/Bookworm/Bookworm.php && phpunit"
+        "test": "echo '\\033[1;33m\nRunning: php codesniffer...\\033[0m'; vendor/bin/phpcs --standard=PSR2 src/Bookworm/Bookworm.php && echo '\\033[1;33mRunning: phpunit...\\033[0m'; phpunit && vendor/bin/php-cs-fixer fix --diff -v --dry-run src"
     },
     "autoload": {
         "psr-0": {
