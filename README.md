@@ -19,35 +19,35 @@ Currently, the only reliable way (and recommended way) to install Bookworm is by
 use Bookworm\Bookworm;
 
 $text = '...';
-$time = Bookworm::estimate($text, Bookworm::TYPE_SHORT);
-echo $time; // 5 min
+$time = Bookworm::estimate($text);
+echo $time; // 5 minutes
 ```
 
 ## API
 ``` php
-Bookworm::estimate(string $text, int $type = Bookworm::TYPE_SHORT);
+Bookworm::estimate(string $text, string|array|bool $units = [ ' minute', ' minutes' ]);
 ```
 
 **Parameters**
 - `$text` The piece of text which the estimation should be based upon.
-- `[$type = Bookworm::TYPE_SHORT]` You can use either `Bookworm::TYPE_SHORT` or `Bookworm::TYPE_LONG`.
+- `$units = [ ' minute', ' minutes' ]` *Optional.* Set it to false, to return just the number of minutes as an integer. If you provide a string, like `m` it will be used for singular and plural and produce `5m`. If you provide an array with two values, the first will be used for singular, the second for plural. `[ ' minute', ' minutes' ]` (not included leading whitespace) will produce `5 minutes`.
 
-**Returns** `string`
+**Returns** `int` or `string`
 
 ## Configuration
-You can configure Bookworm to react other than how it's shipped. You can change translations and the average words per minute.
+You can configure Bookworm to react other than how it's shipped. You can change the average words per minute & the duration a user needs to look at an image. If you do not want images to factor into the reading time estimate, just set it to 0.
 
 ``` php
 <?php
 use Bookworm\Bookworm;
 
-Bookworm::configure(array(
-    'min'    => 'min',
-    'minute' => 'minuut'
-), 300);
+Bookworm::configure([
+    'wordsPerMinute' => 200,
+    'secondsPerImage' => 12
+]);
 ```
 
-The default amount of words per minute is set on 200.
+The default amount of words per minute is set on 200. The default time for a user to look at an image is set to 12 seconds.
 
 ## License
 This project is licensed under MIT license. For the full copyright and license information, please view the LICENSE file
