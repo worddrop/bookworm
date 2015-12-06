@@ -43,11 +43,16 @@ use Bookworm\Bookworm;
 
 Bookworm::configure([
     'wordsPerMinute' => 200,
+    'codewordsPerMinute' => 200,
     'secondsPerImage' => 12
 ]);
 ```
 
-The default amount of words per minute is set on 200. The default time for a user to look at an image is set to 12 seconds.
+**wordsPerMinute** The average amount of words a user will read per minute (*default 200*).
+
+**codewordsPerMinute** The average amount of words in a code block, a user will read per minute (*default 200*).
+
+**secondsPerImage** The average amount of seconds a user will spent looking at an image (*default 12*).
 
 ## License
 This project is licensed under MIT license. For the full copyright and license information, please view the LICENSE file

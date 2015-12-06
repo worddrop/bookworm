@@ -28,6 +28,13 @@ class Bookworm
     private static $wordsPerMinute = 200;
 
     /**
+     * The avarage number of words in a code section a person can read in one minute.
+     *
+     * @var int
+     */
+    private static $codewordsPerMinute = 200;
+
+    /**
      * The avarage number of seconds a person looks at an image.
      *
      * @var int
@@ -50,8 +57,11 @@ class Bookworm
         // Count how many images are in the given text
         $imageCount = self::countImages($text);
         $imageSeconds = $imageCount * self::$secondsPerImage;
+        // Count how many images are in the given text
+        $codeCount = self::countCode($text);
+        $codeSeconds = ($codeCount / self::$codewordsPerMinute) * 60;
         // Calculate the amount of minutes required to read the text
-        $minutes = round(($wordSeconds + $imageSeconds) / 60);
+        $minutes = round(($wordSeconds + $imageSeconds + $codeSeconds) / 60);
         // If it's smaller than one or one, we default it to one
         $minutes = $minutes > 1 ? $minutes : 1;
 
@@ -85,8 +95,10 @@ class Bookworm
         $words = trim(preg_replace('/<img[^>]*>/i', ' ', $words));
         // Remove picture tags from text (counted already due to mandatory img tag)
         $words = trim(preg_replace('/<picture[^>]*>([\s\S]*?)<\/picture>/i', ' ', $words));
-        // Replace any non-word character group with a space
-        $words = trim(preg_replace('/[^\w0-9]+/i', ' ', $words));
+        // Remove code tags
+        $words = trim(preg_replace('/(?<=(?<!`))`[^`\n\r]+`(?=(?!`))|```[\w+]?[^`]*```/i', ' ', $words));
+        // Replace tags
+        $words = strip_tags($words);
         // Explode on spaces to separate words
         $words = explode(' ', $words);
 
@@ -111,22 +123,42 @@ class Bookworm
     }
 
     /**
+     * Counts how many "code words" are in a specific text.
+     *
+     * @param string $text The text from which the words should be counted
+     *
+     * @return int
+     */
+    private static function countCode($text)
+    {
+        // Count markdown images from text
+        $text = preg_replace('/"[^"]*"/i', '', $text);
+        $regex = '/(?<=(?<!`))`[^`\n\r]+`(?=(?!`))|```[\w+]?[^`]*```/i';
+        $markdownCode = preg_match_all($regex, $text, $matches, PREG_PATTERN_ORDER);
+        if (count($matches[0]) === 0) {
+            return 0;
+        }
+        $code = implode($matches[0], ' ');
+
+        return count(array_filter(explode(' ', $code)));
+    }
+    /**
      * Alters the configuration.
      *
-     * @param array $config $wordsPerMinute
+     * @param array $config
      */
-    public static function configure(array $config = array())
+    public static function configure(array $config = [])
     {
         $config = array_merge(
-            array(
-                'wordsPerMinute' => 200,
-                'secondsPerImage' => 12,
-            ),
+            [
+                'wordsPerMinute' => self::$wordsPerMinute,
+                'secondsPerImage' => self::$secondsPerImage,
+                'codewordsPerMinute' => self::$codewordsPerMinute,
+            ],
             $config
         );
-
         self::$wordsPerMinute = $config['wordsPerMinute'];
-
         self::$secondsPerImage = $config['secondsPerImage'];
+        self::$codewordsPerMinute = $config['codewordsPerMinute'];
     }
 }
