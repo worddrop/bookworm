@@ -142,7 +142,6 @@ class Bookworm
         if (count($matches[0]) === 0) {
             return 0;
         }
-        print_r($matches);
         $code = implode($matches[0], ' ');
 
         return count(array_filter(explode(' ', $code)));
