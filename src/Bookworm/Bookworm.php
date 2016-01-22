@@ -131,13 +131,18 @@ class Bookworm
      */
     private static function countCode($text)
     {
-        // Count markdown images from text
+        // Count markdown code from text
         $text = preg_replace('/"[^"]*"/i', '', $text);
+
+        // use match & replace in one
+        // http://stackoverflow.com/questions/34115503/php-remove-regex-from-string-but-keep-match-rest
+
         $regex = '/(?<=(?<!`))`[^`\n\r]+`(?=(?!`))|```[\w+]?[^`]*```/i';
         $markdownCode = preg_match_all($regex, $text, $matches, PREG_PATTERN_ORDER);
         if (count($matches[0]) === 0) {
             return 0;
         }
+        print_r($matches);
         $code = implode($matches[0], ' ');
 
         return count(array_filter(explode(' ', $code)));
