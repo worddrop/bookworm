@@ -95,9 +95,10 @@ class Bookworm
         $words = trim(preg_replace('/<img[^>]*>/i', ' ', $words));
         // Remove picture tags from text (counted already due to mandatory img tag)
         $words = trim(preg_replace('/<picture[^>]*>([\s\S]*?)<\/picture>/i', ' ', $words));
-        // Remove code tags
+        // Remove code markdown
         $words = trim(preg_replace('/(?<=(?<!`))`[^`\n\r]+`(?=(?!`))|```[\w+]?[^`]*```/i', ' ', $words));
-        // Replace tags
+        // Remove code html
+        $words = trim(preg_replace('/<code>([\s\S]*?)<\/code>/i', ' ', $words));
         $words = strip_tags($words);
         // Explode on spaces to separate words
         $words = explode(' ', $words);
@@ -131,15 +132,29 @@ class Bookworm
      */
     private static function countCode($text)
     {
-        // Count markdown images from text
+        // remove code attribute content, like from href="" or d=""
         $text = preg_replace('/"[^"]*"/i', '', $text);
-        $regex = '/(?<=(?<!`))`[^`\n\r]+`(?=(?!`))|```[\w+]?[^`]*```/i';
-        $markdownCode = preg_match_all($regex, $text, $matches, PREG_PATTERN_ORDER);
-        if (count($matches[0]) === 0) {
+        // get markdown code
+        $regex = '/(?<=(?<!`))`([^`\n\r]+)`(?=(?!`))|```[a-zA-Z]*([^`]*)```/i';
+        $markdownCount = preg_match_all($regex, $text, $markdownMatches, PREG_PATTERN_ORDER);
+        // Remove markdown code from text, as to not double count
+        $text = trim(preg_replace('/(?<=(?<!`))`[^`\n\r]+`(?=(?!`))|```[a-zA-Z]*[^`]*```/i', ' ', $text));
+
+        // get html code elements
+        $regex = '/<code>([\s\S]*?)<\/code>/i';
+        $htmlCount = preg_match_all($regex, $text, $htmlMatches, PREG_PATTERN_ORDER);
+
+        // check if any matches exist
+        if ($markdownCount === 0 && $htmlCount === 0) {
             return 0;
         }
-        $code = implode($matches[0], ' ');
+        // concat all code
+        $code = implode($markdownMatches[1], ' ').' '.implode($markdownMatches[2], ' ').' '.implode($htmlMatches[1], ' ');
 
+        // replace multiple spaces
+        $code = preg_replace(['/\s+/', '/^\s/'], [' ', ''], $code);
+
+        // return the number words in the code blocks
         return count(array_filter(explode(' ', $code)));
     }
     /**
